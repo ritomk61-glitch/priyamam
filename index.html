@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LOVE YOU PRIYA — Motki ❤️</title>
+  <style>
+    :root{
+      --bg-1:#04040a;
+      --bg-2:#081022;
+      --pink:#ff6b81;
+      --purple:#7c3aed;
+      --white: #ffffff;
+      --muted: rgba(255,255,255,0.78);
+      --card: rgba(255,255,255,0.02);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:radial-gradient(800px 400px at 10% 10%, rgba(124,58,237,0.06), transparent), linear-gradient(180deg,var(--bg-1),var(--bg-2));-webkit-font-smoothing:antialiased;color:var(--muted)}
+
+    .page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{width:100%;max-width:920px;border-radius:20px;padding:28px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));backdrop-filter:blur(6px);position:relative;overflow:hidden;box-shadow:0 30px 80px rgba(2,6,23,0.7)}
+
+    .card:before{content:'';position:absolute;left:-30%;top:-20%;width:160%;height:360px;background:linear-gradient(90deg,var(--purple),var(--pink));filter:blur(100px);opacity:0.12;transform:rotate(-8deg)}
+
+    header{display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-weight:800;color:white}
+    h1{margin:0;font-size:16px;color:var(--muted)}
+
+    /* floating background particles and hearts */
+    .bg-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+    .particle{position:absolute;width:6px;height:6px;border-radius:50%;background:linear-gradient(90deg,var(--pink),var(--purple));opacity:0.18}
+    .heart{position:absolute;width:32px;height:32px;transform:rotate(45deg);opacity:0}
+    .heart:before,.heart:after{content:'';position:absolute;border-radius:50%;background:linear-gradient(90deg,var(--pink),var(--purple));}
+    .heart:before{width:32px;height:32px;top:-16px;left:0}
+    .heart:after{width:32px;height:32px;left:16px;top:0}
+
+    /* center stage */
+    .stage{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 18px}
+
+    /* BIG white glowing text */
+    .big-text{
+      font-weight:900;letter-spacing:0.02em;text-align:center;
+      font-size:clamp(44px,9vw,96px);line-height:0.9;margin:0;padding:0;color:var(--white);
+      text-shadow: 0 10px 30px rgba(124,58,237,0.12), 0 6px 18px rgba(255,107,129,0.08);
+      transform-origin:center center;opacity:0;filter:drop-shadow(0 16px 40px rgba(255,107,129,0.08));
+    }
+
+    .sub-text{margin-top:12px;color:var(--muted);font-size:clamp(14px,2.8vw,20px);opacity:0;transform:translateY(8px)}
+
+    /* teary face */
+    .face-wrap{position:relative;height:120px;width:240px;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+    .face{font-size:72px;opacity:0;transform:translateY(60px) scale(0.9);filter:drop-shadow(0 10px 20px rgba(0,0,0,0.4));}
+
+    /* animations */
+    @keyframes popIn{
+      0%{opacity:0;transform:scale(0.86) translateY(18px)}
+      60%{opacity:1;transform:scale(1.06) translateY(-6px)}
+      100%{opacity:1;transform:scale(1) translateY(0)}
+    }
+    @keyframes floatUp{
+      0%{opacity:0;transform:translateY(60px) scale(0.9)}
+      30%{opacity:1}
+      100%{opacity:1;transform:translateY(-30px) scale(1)}
+    }
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    @media (max-width:520px){ .card{padding:22px} .big-text{font-size:48px} .face{font-size:58px} }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card" role="main" aria-label="A love message for Priya">
+
+      <div class="bg-layer" id="bgLayer" aria-hidden="true"></div>
+
+      <header>
+        <div class="brand">
+          <div class="logo">M</div>
+          <div>
+            <h1>For Priya — Motki</h1>
+            <div style="font-size:13px;color:var(--muted)">Open and watch ❤️</div>
+          </div>
+        </div>
+        <div>
+          <button id="download" style="background:transparent;border:2px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:var(--muted);cursor:pointer">Download</button>
+        </div>
+      </header>
+
+      <div class="stage">
+        <h2 id="big" class="big-text">LOVE YOU PRIYA</h2>
+        <div id="sub" class="sub-text">and miss you</div>
+
+        <div class="face-wrap">
+          <div id="face" class="face">🥺</div>
+        </div>
+      </div>
+
+      <footer>Made with ❤️ — Motki</footer>
+    </div>
+  </div>
+
+  <script>
+    const big = document.getElementById('big');
+    const sub = document.getElementById('sub');
+    const face = document.getElementById('face');
+    const bgLayer = document.getElementById('bgLayer');
+
+    // create soft floating particles and slow hearts in background
+    function makeParticle(x,y,size,delay){
+      const p = document.createElement('div'); p.className='particle';
+      p.style.left = x + '%'; p.style.top = y + '%'; p.style.width = size + 'px'; p.style.height = size + 'px';
+      p.style.opacity = (0.06 + Math.random()*0.14).toString();
+      bgLayer.appendChild(p);
+      const dur = 8000 + Math.random()*12000;
+      p.animate([{transform:'translateY(0) scale(1)'},{transform:`translateY(-${40 + Math.random()*60}px) scale(1.2)`}],{duration:dur,iterations:Infinity,easing:'linear',delay:delay});
+    }
+
+    function makeHeart(x){
+      const h = document.createElement('div'); h.className='heart';
+      h.style.left = x + '%'; h.style.top = 100 + 'px';
+      bgLayer.appendChild(h);
+      const dur = 3200 + Math.random()*2200;
+      h.animate([{transform:'translateY(0) rotate(45deg) scale(0.8)', opacity:0},{transform:'translateY(-260px) rotate(45deg) scale(1)', opacity:1},{transform:'translateY(-420px) rotate(45deg) scale(1.1)', opacity:0}],{duration:dur,easing:'cubic-bezier(.22,.9,.2,1)'});
+      setTimeout(()=> h.remove(), dur + 80);
+    }
+
+    // populate background with gentle particles
+    function fillBackground(){
+      for(let i=0;i<18;i++){
+        const x = Math.random()*100; const y = 20 + Math.random()*70; const s = 4 + Math.random()*8; const d = -Math.random()*5000;
+        makeParticle(x,y,s,d);
+      }
+      // gently spawn hearts occasionally
+      setInterval(()=>{ makeHeart(8 + Math.random()*84); }, 1400);
+    }
+
+    // entrance sequence: big text pop, then sub, then face floats up
+    function entrance(){
+      // big text
+      big.style.opacity = 0; big.style.transform = 'scale(0.9)';
+      setTimeout(()=>{ big.style.animation = 'popIn 720ms cubic-bezier(.2,.9,.2,1) forwards'; big.style.opacity = 1; }, 200);
+
+      // sub text
+      setTimeout(()=>{ sub.style.transition = 'all 520ms cubic-bezier(.2,.9,.2,1)'; sub.style.opacity = 1; sub.style.transform = 'translateY(0)'; }, 980);
+
+      // face floats up after a pause
+      setTimeout(()=>{
+        face.style.transition = 'all 900ms cubic-bezier(.2,.9,.2,1)';
+        face.style.opacity = 1; face.style.transform = 'translateY(0) scale(1)';
+        // gentle float animation
+        face.animate([{transform:'translateY(0) scale(1)'},{transform:'translateY(-18px) scale(1.02)'},{transform:'translateY(0) scale(1)'}],{duration:2600,iterations:Infinity,easing:'ease-in-out'});
+      }, 1500);
+
+      // burst a few hearts at start
+      setTimeout(()=>{ for(let i=0;i<12;i++){ setTimeout(()=> makeHeart(8 + Math.random()*84), i*60); } }, 700);
+    }
+
+    // run
+    window.addEventListener('load', ()=>{ fillBackground(); entrance(); });
+
+    // download
+    document.getElementById('download').addEventListener('click', ()=>{
+      const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'love_you_priya_final.html'; a.click(); URL.revokeObjectURL(a.href);
+    });
+  </script>
+</body>
+</html>
